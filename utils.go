@@ -15,6 +15,7 @@ func NewTimeouts(verifier Verifier, majority int) *Timeouts {
 	}
 }
 
+// 定时器
 type Timeouts struct {
 	verifier Verifier
 	view     uint64
@@ -34,8 +35,11 @@ func (t *Timeouts) Start(view uint64) {
 	}
 }
 
+// 定时器重置
 func (t *Timeouts) Reset() {
+	// 重置视图
 	t.view = 0
+	// 删除定时器内收到的消息
 	for k := range t.received {
 		delete(t.received, k)
 	}
@@ -72,6 +76,7 @@ func NewVotes(verifier Verifier, majority int) *Votes {
 
 // Votes keeps track of votes for a block in a round.
 // Must be reset at the start of every round.
+// 每一轮视图的投票监视器
 type Votes struct {
 	verifier Verifier
 	majority int

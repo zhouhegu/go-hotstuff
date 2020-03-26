@@ -9,6 +9,7 @@ func OpenDB(path string) (*leveldb.DB, error) {
 	return leveldb.OpenFile(path, nil)
 }
 
+// 连接数据库
 func NewMemDB() *leveldb.DB {
 	db, err := leveldb.Open(storage.NewMemStorage(), nil)
 	if err != nil {

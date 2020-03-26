@@ -12,17 +12,21 @@ type (
 	PrivateKey = blssig.SecretKey
 )
 
+// 生成一对公私钥
 func GenerateKey(rng io.Reader) (PrivateKey, *PublicKey, error) {
 	if rng == nil {
 		rng = rand.Reader
 	}
+	// 随机生成私钥
 	priv, err := blssig.RandSecretKey(rng)
 	if err != nil {
 		return nil, nil, err
 	}
+	// 估计私钥生成公钥
 	return priv, blssig.PublicKeyFromSecretKey(priv), nil
 }
 
+// 生成一组公私钥
 func GenerateKeys(rng io.Reader, n int) ([]PublicKey, []PrivateKey, error) {
 	pubs := make([]blssig.PublicKey, n)
 	privs := make([]blssig.SecretKey, n)

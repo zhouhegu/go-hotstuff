@@ -21,17 +21,22 @@ func (v *BLS12381Verifier) Verify(idx uint64, msg, sig []byte) bool {
 	if idx >= uint64(len(v.pubkeys)) {
 		return false
 	}
+	// 获取公钥组内其中一个公钥
 	key := v.pubkeys[idx]
+	// 解压签名
 	signature, err := blssig.NewSignatureFromCompresssed(sig)
 	if err != nil {
 		return false
 	}
 	m := [32]byte{}
 	copy(m[:], msg)
+	// 认证
 	return blssig.Verify(m, domain, signature, &key)
 }
 
+// 整体门限签名认证
 func (v *BLS12381Verifier) VerifyAggregated(msg []byte, asig *types.AggregatedSignature) bool {
+	// 个数要满足
 	if len(asig.Voters) < v.threshold {
 		return false
 	}
@@ -51,6 +56,7 @@ func (v *BLS12381Verifier) VerifyAggregated(msg []byte, asig *types.AggregatedSi
 	return blssig.VerifyAggregateCommon(m, domain, pubs, sig)
 }
 
+// 将一个部门签名合并到整体签名里面
 func (v *BLS12381Verifier) Merge(asig *types.AggregatedSignature, voter uint64, sig []byte) {
 	if voter >= uint64(len(v.pubkeys)) {
 		return

@@ -1,10 +1,10 @@
 module github.com/dshulyak/go-hotstuff
 
-go 1.13
+go 1.14
 
 require (
 	github.com/gogo/protobuf v1.3.1
-	github.com/golang/protobuf v1.3.2
+	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/kilic/bls12-381 v0.0.0-20191103193557-038659eaa189
 	github.com/stretchr/testify v1.4.0
 	github.com/syndtr/goleveldb v1.0.0
