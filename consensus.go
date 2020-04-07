@@ -9,44 +9,53 @@ import (
 )
 
 type Signer interface {
+	// 签名
 	Sign([]byte, []byte) []byte
 }
 
 type Verifier interface {
+	// 验证整体签名
 	VerifyAggregated([]byte, *types.AggregatedSignature) bool
 	Verify(uint64, []byte, []byte) bool
+	// 合并部分签名
 	Merge(*types.AggregatedSignature, uint64, []byte)
 }
 
 func newConsensus(
-	logger *zap.Logger,
-	store *BlockStore,
-	signer Signer,
-	verifier Verifier,
-	id uint64,
-	replicas []uint64,
+	logger *zap.Logger, // 日志
+	store *BlockStore, // 数据库操作
+	signer Signer, // 签名者，只有一个？
+	verifier Verifier, // 验证者，只有一个？
+	id uint64, // 共识id
+	replicas []uint64, // 所有节点
 ) *consensus {
 	logger = logger.Named(fmt.Sprintf("replica=%d", id))
+	// 获取视图
 	view, err := store.GetView()
 	if err != nil {
 		logger.Fatal("failed to load view", zap.Error(err))
 	}
+	// 获取投票
 	voted, err := store.GetVoted()
 	if err != nil {
 		logger.Fatal("failed to load voted view", zap.Error(err))
 	}
+	// 获取旧的prepare消息
 	prepare, err := store.GetTagHeader(PrepareTag)
 	if err != nil {
 		logger.Fatal("failed to load prepare header", zap.Error(err))
 	}
+	// 获取旧的locked消息
 	locked, err := store.GetTagHeader(LockedTag)
 	if err != nil {
 		logger.Fatal("failed to load locked header", zap.Error(err))
 	}
+	// 获取旧的commit消息
 	commit, err := store.GetTagHeader(DecideTag)
 	if err != nil {
 		logger.Fatal("failed to load commit header", zap.Error(err))
 	}
+	// TODO 获取旧的prepareCert凭证
 	prepareCert, err := store.GetTagCert(PrepareTag)
 	if err != nil {
 		logger.Fatal("failed to load prepare certificate", zap.Error(err))
@@ -297,6 +306,7 @@ func (c *consensus) persistProposal(msg *types.Proposal) {
 	}
 }
 
+// 视图切换
 func (c *consensus) sendNewView() {
 	// send new-view to the leader of this round.
 	leader := c.getLeader(c.view)

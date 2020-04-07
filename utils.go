@@ -24,6 +24,7 @@ type Timeouts struct {
 	Cert     *types.TimeoutCertificate
 }
 
+// 开启定时器
 func (t *Timeouts) Start(view uint64) {
 	if t.view != 0 {
 		panic("timeouts must be reset before starting collection for another view")

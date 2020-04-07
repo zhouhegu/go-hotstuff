@@ -22,11 +22,13 @@ type Data struct {
 	Data  *types.Data
 }
 
+// 副本包含IP和ID
 type Replica struct {
 	ID crypto.PublicKey
 	IP net.IP
 }
 
+// 全局控制副本
 type Config struct {
 	Interval time.Duration
 	ID       crypto.PublicKey
@@ -34,6 +36,7 @@ type Config struct {
 }
 
 func NewNode(logger *zap.Logger, store *BlockStore, priv crypto.PrivateKey, conf Config) *Node {
+	// 新建signer
 	signer := crypto.NewBLS12381Signer(priv)
 	replicas := conf.Replicas
 	// FIXME introduce type ID []byte or [32]byte and use it instead of uint64 for replica id everywhere
@@ -43,15 +46,18 @@ func NewNode(logger *zap.Logger, store *BlockStore, priv crypto.PrivateKey, conf
 	for i, r := range replicas {
 		id := uint64(i)
 		ids = append(ids, id)
-
+		// 将公钥加入
 		pubs = append(pubs, r.ID)
 
 		if conf.ID == r.ID {
 			rid = id
 		}
 	}
+	// 生成门限verifier
 	verifier := crypto.NewBLS12381Verifier(2*len(pubs)/3+1, pubs)
+	// TODO 新建了共识，暂时不懂
 	consensus := newConsensus(logger, store, signer, verifier, rid, ids)
+	// 属性填充
 	n := &Node{
 		logger:      logger,
 		conf:        conf,
@@ -67,23 +73,24 @@ func NewNode(logger *zap.Logger, store *BlockStore, priv crypto.PrivateKey, conf
 		done:        make(chan struct{}),
 		start:       make(chan struct{}),
 	}
+	// 运行节点
 	go n.run()
 	return n
 }
 
 type Node struct {
-	logger *zap.Logger
-	conf   Config
+	logger *zap.Logger // 日志
+	conf   Config      // 全局配置，主要是获取全局公钥，定时器时间和其他节点
 
-	consensus *consensus
-	store     *BlockStore
+	consensus *consensus  // 参与共识
+	store     *BlockStore // 操作数据库
 
-	received    chan *types.Message
-	deliver     chan []MsgTo
-	send        chan Data
+	received    chan *types.Message // 收到的消息通道
+	deliver     chan []MsgTo        // 通道目标对象
+	send        chan Data           // 发送的数据
 	blocks      chan []BlockEvent
 	missing     chan []BlockRef
-	waitingData chan struct{}
+	waitingData chan struct{} // ？？？
 	quit        chan struct{}
 	done        chan struct{}
 	start       chan struct{}
@@ -150,6 +157,7 @@ func (n *Node) Close() {
 func (n *Node) run() {
 	n.logger.Debug("started event loop")
 	var (
+		// 开启定时器
 		ticker = time.NewTicker(n.conf.Interval)
 
 		toSend   []MsgTo
@@ -164,7 +172,9 @@ func (n *Node) run() {
 
 	for {
 		// wait until all existing progress will be consumed
+		// 所有数据都没有的话
 		if missing == nil && waitingData == nil && blocks == nil && messages == nil {
+			// 获取共识进度
 			progress := n.consensus.Progress
 			if len(progress.Messages) > 0 {
 				toSend = progress.Messages
@@ -181,6 +191,7 @@ func (n *Node) run() {
 				missing = n.missing
 				toSync = progress.NotFound
 			}
+			// 重置共识进度
 			n.consensus.Progress.Reset()
 		}
 
