@@ -1,5 +1,7 @@
 package hotstuff
 
+// 数据库存储相关信息
+
 import (
 	"github.com/dshulyak/go-hotstuff/types"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -137,10 +139,12 @@ func (s *BlockStore) GetTagCert(tag Tag) (*types.Certificate, error) {
 	return s.GetCertificate(hash)
 }
 
+// 存储视图信息，加密后存储
 func (s *BlockStore) SaveView(view uint64) error {
 	return s.db.Put([]byte{viewBucket}, EncodeUint64(view), nil)
 }
 
+// 获取当前视图信息，解密后返回
 func (s *BlockStore) GetView() (uint64, error) {
 	data, err := s.db.Get([]byte{viewBucket}, nil)
 	if err != nil {

@@ -22,9 +22,11 @@ func NewBLS12381Signer(priv blssig.SecretKey) *BLS12381Signer {
 
 // 门限签名类，包含私钥
 type BLS12381Signer struct {
+	// 私钥类型为SecretKey
 	priv blssig.SecretKey
 }
 
+// BLS12381Signer类型的扩展方法，可在BLS12381Signer的实例中调用该方法
 func (s *BLS12381Signer) Sign(dst, msg []byte) []byte {
 	// 要求消息为32个byte长度
 	if len(msg) != 32 {
@@ -35,7 +37,7 @@ func (s *BLS12381Signer) Sign(dst, msg []byte) []byte {
 	// 用私钥对消息签名，暂时不懂domain的含义
 	sig := blssig.Sign(m, domain, s.priv)
 	// this conversion is quit inneficient, and should be done on the caller side when signature will be sent over
-	// the wiree
+	// the wire
 	// 添加到dst后面
 	return append(dst, blssig.SignatureToCompressed(sig)...)
 }

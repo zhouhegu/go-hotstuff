@@ -4,7 +4,7 @@ import (
 	"github.com/dshulyak/go-hotstuff/types"
 	"github.com/kilic/bls12-381/blssig"
 )
-
+// 门限签名验证器
 func NewBLS12381Verifier(threshold int, pubkeys []blssig.PublicKey) *BLS12381Verifier {
 	return &BLS12381Verifier{
 		threshold: threshold,
@@ -16,6 +16,7 @@ type BLS12381Verifier struct {
 	threshold int
 	pubkeys   []blssig.PublicKey
 }
+
 
 func (v *BLS12381Verifier) Verify(idx uint64, msg, sig []byte) bool {
 	if idx >= uint64(len(v.pubkeys)) {

@@ -1,6 +1,6 @@
 module github.com/dshulyak/go-hotstuff
 
-go 1.14
+go 1.15
 
 require (
 	github.com/gogo/protobuf v1.3.1

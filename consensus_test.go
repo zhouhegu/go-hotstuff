@@ -10,12 +10,15 @@ import (
 	"go.uber.org/zap"
 )
 
+// 创世区块
 func randGenesis() *types.Block {
 	header := &types.Header{
 		DataRoot: randRoot(),
 	}
 	return &types.Block{
+		// 区块头
 		Header: header,
+		// 数字证书信息
 		Cert: &types.Certificate{
 			Block: header.Hash(),
 			Sig:   &types.AggregatedSignature{},
@@ -30,6 +33,7 @@ func randRoot() []byte {
 	return root
 }
 
+// 测试节点结构
 type testNode struct {
 	*consensus
 	ID       uint64
@@ -38,11 +42,13 @@ type testNode struct {
 	Verifier Verifier
 }
 
+// 设置测试节点
 func setupTestNodes(tb testing.TB, n int) []*testNode {
 	genesis := randGenesis()
 	logger, err := zap.NewDevelopment()
 	require.NoError(tb, err)
 
+	// 生成n对公私钥
 	pubs, privs, err := crypto.GenerateKeys(nil, n)
 	replicas := make([]uint64, 0, n)
 

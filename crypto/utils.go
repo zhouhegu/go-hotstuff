@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	PublicKey  = blssig.PublicKey
+	PublicKey = blssig.PublicKey
 	PrivateKey = blssig.SecretKey
 )
 
@@ -22,11 +22,11 @@ func GenerateKey(rng io.Reader) (PrivateKey, *PublicKey, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	// 估计私钥生成公钥
+	// 估计私钥生成公钥，通过PublicKeyFromSecretKey生成公钥并返回
 	return priv, blssig.PublicKeyFromSecretKey(priv), nil
 }
 
-// 生成一组公私钥
+// 生成n对公私钥
 func GenerateKeys(rng io.Reader, n int) ([]PublicKey, []PrivateKey, error) {
 	pubs := make([]blssig.PublicKey, n)
 	privs := make([]blssig.SecretKey, n)

@@ -3,7 +3,6 @@ package hotstuff
 import (
 	"bytes"
 	"fmt"
-
 	"github.com/dshulyak/go-hotstuff/types"
 	"go.uber.org/zap"
 )
@@ -24,8 +23,8 @@ type Verifier interface {
 func newConsensus(
 	logger *zap.Logger, // 日志
 	store *BlockStore, // 数据库操作
-	signer Signer, // 签名者，只有一个？
-	verifier Verifier, // 验证者，只有一个？
+	signer Signer, // 签名者，只有一个
+	verifier Verifier, // 验证者，只有一个
 	id uint64, // 共识id
 	replicas []uint64, // 所有节点
 ) *consensus {
@@ -318,6 +317,7 @@ func (c *consensus) sendNewView() {
 		Sig: c.signer.Sign(nil, HashSum(EncodeUint64(c.view-1))),
 	}
 	c.voted = c.view - 1
+	// 存储选举信息
 	err := c.store.SaveVoted(c.voted)
 	if err != nil {
 		c.vlog.Fatal("can't save voted", zap.Error(err))
